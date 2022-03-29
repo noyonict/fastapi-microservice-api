@@ -49,7 +49,7 @@ async def create(request: dict, background_task: BackgroundTasks):  # id, quanti
         status='pending',
     )
     order.save()
-    background_task(order_completed, order)
+    background_task.add_task(order_completed, order)
     return order
 
 
@@ -58,11 +58,22 @@ def order_completed(order: Order):
     order.status = 'completed'
     order.save()
 
+
+def get_individual_order(order_id: str):
+    order = Order.get(order_id)
+    return order
+
+
 @app.get('/orders')
 def get_orders():
-    return Order.all_pks()
+    return [get_individual_order(order_id) for order_id in Order.all_pks()]
 
 
 @app.get('/orders/{pk}')
 def get_orders(pk: str):
     return Order.get(pk)
+
+
+@app.delete('/orders/{pk}')
+def get_orders(pk: str):
+    return Order.delete(pk)
