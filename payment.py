@@ -44,7 +44,7 @@ async def create(request: dict, background_task: BackgroundTasks):  # id, quanti
         product_id=product['id'],
         price=product['price'],
         fee=product['price'] * 0.2,
-        total=product['price'] * 1.2,
+        total=product['price'] * 1.2 * request['quantity'],
         quantity=request['quantity'],
         status='pending',
     )
@@ -56,6 +56,7 @@ async def create(request: dict, background_task: BackgroundTasks):  # id, quanti
 def order_completed(order: Order):
     time.sleep(5)
     order.status = 'completed'
+    redis.xadd('order_completed', order.dict(), '*')
     order.save()
 
 
